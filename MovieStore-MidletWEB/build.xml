@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+
+<project name="sample-movieUI" default="build" basedir=".">
+
+    <!-- Define the Wireless Toolkit home directory. Needed by the tasks. -->
+
+    <property name="wtk.home" value="C:\WTK2.5.2_01"/>
+
+    <!-- Define some additional properties for this project. Not required. -->
+
+    <property name="midlet.name" value="Movie-MidletDemo"/>
+    <property name="midlet.home" value="${midlet.name}"/>
+	<property name="wtk.midp.version" value="2.1"/>
+	<property name="wtk.cldc.version" value="1.1"/>
+
+	<!-- External dependencies -->
+	<property name="lib.kxml" value="C:/Users/Chandler/Downloads/kxml2-2.3.0.jar"/>
+	
+	<!-- Define the tasks. -->
+	
+    <taskdef resource="antenna.properties"/>
+	
+	
+	
+	<target name="clean">
+		<delete failonerror="false" dir="classes"/>
+	    <!--delete failonerror="false">
+	        <fileset dir=".">
+	            <exclude name="build.xml"/>
+	        </fileset>
+	    </delete-->
+	</target>
+	
+    <target name="build">
+    	<property name="lib.kxml" value="C:/Users/Chandler/Downloads/kxml2-2.3.0.jar"/>
+    	<mkdir dir="classes"/>
+    	<unjar src="${lib.kxml}" dest="classes"/>	
+    	<echo message="Packaging library"/>
+    	<jar destfile="bin/${midlet.name}.jar">
+    	<fileset dir="classes" includes="**/*.class"/>
+    	</jar>
+    	        
+        <!-- Compile everything, but don't preverify (yet). -->		
+		<wtkbuild srcdir="${basedir}/src"
+                  destdir="classes"
+				  includeantruntime="true"
+                  preverify="false"
+				listfiles="yes">
+			<classpath>
+			    <pathelement location="${lib.kxml}"/>
+			</classpath>
+		</wtkbuild>
+				  
+		<wtkjad jadfile="bin/${midlet.name}.jad"
+                jarfile="bin/${midlet.name}.jar"
+                manifest="bin/MANIFEST.MF"
+                name="${midlet.name}"
+                vendor="${midlet.name}"
+                version="1.0.0" >
+
+            <midlet name="MovieMidlet" class="j2me.midlet.MovieMidlet" />
+            <!--attribute name="findAllMovies" value="http://localhost:8080/movieweb/services/library/movies/"/>
+			<attribute name="findMovieById" value="http://localhost:8080/movieweb/services/library/movie/"/>
+			<attribute name="addMovie" value="http://localhost:8080/movieweb/services/library/addMovie/"/-->
+			<attribute name="findAllMovies" value="http://vikram-moviestoreweb.cloudfoundry.com/services/library/movies/"/>
+			<attribute name="findMovieById" value="http://vikram-moviestoreweb.cloudfoundry.com/services/library/movie/"/>
+			<attribute name="addMovie" value="http://vikram-moviestoreweb.cloudfoundry.com/services/library/addMovie/"/>
+									
+			
+        </wtkjad>       
+
+        <!-- Package everything. Most of the necessary information is
+             contained in the JAD file. Also preverify the result this
+             time. To obfuscate everything, set the corresponding
+             parameter to "true" (requires RetroGuard or ProGuard). The
+             version parameter increments the MIDlet-Version by one. -->
+
+        <wtkpackage jarfile="bin/${midlet.name}.jar"
+                    jadfile="bin/${midlet.name}.jad"
+					manifest="bin/MANIFEST.MF"
+                    obfuscate="false"
+                    preverify="true"
+                    autoversion="true">
+
+            <!-- Package our newly compiled classes and the
+                 resources from the WTK's demo application. -->
+
+            <fileset dir="classes"/>
+            <fileset dir="${basedir}/res"/>
+    			
+        </wtkpackage>
+    		
+        <!-- Start the MIDlet suite -->
+
+    	<wtkrun jadfile="bin/${midlet.name}.jad" device="DefaultColorPhone" wait="true"/>
+
+    </target>
+
+</project>
